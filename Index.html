@@ -3,23 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RS SPON รับเงิน</title>
+    <title>RSPON รับเงิน</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        /* ตั้งค่าพื้นฐาน */
+        :root {
+            --bg-color: #1a0b0b;
+            --card-bg: rgba(20, 20, 20, 0.65);
+            --text-main: #ffffff;
+            --text-sub: #d1d1d1;
+            --accent-fire: #ff4500;
+            --accent-gold: #ffd700;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Kanit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: #0f0c29;  /* fallback */
-            background: linear-gradient(to top, #240b36, #c31432); /* สีธีมไฟ */
+            background-color: var(--bg-color);
+            background-image: linear-gradient(180deg, #1a0b0b 0%, #4a0000 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -28,8 +37,8 @@
             position: relative;
         }
 
-        /* เอฟเฟกต์สะเก็ดไฟ (Fire Particles) */
-        .fire-particles {
+        /* --- Background Animation (Fire Sparks) --- */
+        .fire-container {
             position: absolute;
             top: 0;
             left: 0;
@@ -39,253 +48,299 @@
             z-index: 0;
             pointer-events: none;
         }
-
-        .particle {
+        .spark {
             position: absolute;
-            bottom: -10px;
-            background: rgba(255, 200, 0, 0.6);
+            bottom: -20px;
+            background: rgba(255, 69, 0, 0.7);
             border-radius: 50%;
-            box-shadow: 0 0 10px 2px rgba(255, 69, 0, 0.8);
-            animation: rise 5s infinite ease-in;
+            box-shadow: 0 0 15px 2px rgba(255, 140, 0, 0.6);
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 0.8; }
+            100% { transform: translateY(-120vh) scale(0); opacity: 0; }
         }
 
-        @keyframes rise {
-            0% {
-                bottom: -10px;
-                transform: translateX(0);
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.8;
-            }
-            100% {
-                bottom: 100vh;
-                transform: translateX(100px);
-                opacity: 0;
-            }
-        }
-
-        /* กล่องคอนเทนเนอร์หลัก */
+        /* --- Main Card --- */
         .container {
             position: relative;
-            z-index: 1;
-            width: 90%;
-            max-width: 500px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 30px rgba(255, 69, 0, 0.4);
+            z-index: 2;
+            width: 100%;
+            max-width: 420px; /* ขนาดเหมาะมือถือ */
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 69, 0, 0.2);
+            border-radius: 24px;
+            padding: 30px 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             text-align: center;
         }
 
-        .header-title {
+        /* --- Profile Header --- */
+        .profile-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #333;
+            margin: 0 auto 15px;
+            border: 3px solid var(--accent-fire);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
             color: #fff;
-            font-size: 28px;
+            box-shadow: 0 0 15px var(--accent-fire);
+        }
+        
+        h1 {
+            font-size: 24px;
+            color: var(--text-main);
+            margin-bottom: 5px;
             font-weight: 600;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px #ff4500;
+        }
+        
+        .verified-badge {
+            color: #00bfff;
+            font-size: 18px;
+            margin-left: 5px;
         }
 
-        .header-subtitle {
-            color: #ffd700;
-            font-size: 18px;
+        p.subtitle {
+            color: var(--text-sub);
+            font-size: 14px;
             margin-bottom: 30px;
         }
 
-        /* การ์ดบัญชีแต่ละอัน */
-        .account-card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
+        /* --- Payment Items --- */
+        .payment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .payment-item {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 15px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: transform 0.3s, box-shadow 0.3s;
-            border-left: 5px solid;
+            transition: transform 0.2s ease, background 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .account-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        .payment-item:active {
+            transform: scale(0.98);
         }
 
-        /* สีแยกตามธนาคาร */
-        .kbank { border-left-color: #138f2d; } /* สีเขียวกสิกร */
-        .wallet { border-left-color: #ff8300; } /* สีส้มทรูมันนี่ */
-        .promptpay { border-left-color: #005696; } /* สีน้ำเงินพร้อมเพย์ */
-
-        .info {
-            text-align: left;
+        .payment-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
             flex-grow: 1;
-            padding-left: 15px;
         }
 
-        .bank-name {
-            font-size: 14px;
-            color: #ddd;
+        .bank-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: #fff; /* รองพื้นสีขาวให้โลโก้ชัด */
+            padding: 2px;
+        }
+
+        .payment-details {
+            text-align: left;
+        }
+
+        .bank-label {
+            font-size: 12px;
+            color: var(--text-sub);
             display: block;
         }
 
-        .acc-number {
-            font-size: 22px;
-            font-weight: bold;
-            color: #fff;
-            letter-spacing: 1px;
-            margin: 5px 0;
+        .acc-num {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--accent-gold);
+            letter-spacing: 0.5px;
+            display: block;
+            margin-top: 2px;
         }
 
-        .acc-name {
-            font-size: 14px;
-            color: #bbb;
-        }
-
-        .bank-icon {
-            font-size: 40px;
-            width: 50px;
-            text-align: center;
-        }
-        
-        .kbank .bank-icon { color: #138f2d; }
-        .wallet .bank-icon { color: #ff8300; }
-        .promptpay .bank-icon { color: #005696; }
-
-        /* ปุ่มคัดลอก */
         .btn-copy {
-            background: linear-gradient(45deg, #ff416c, #ff4b2b);
-            border: none;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 50px;
+            background: rgba(255, 69, 0, 0.2);
+            border: 1px solid var(--accent-fire);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            font-size: 14px;
-            transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4);
+            transition: all 0.3s;
+            flex-shrink: 0;
         }
 
         .btn-copy:hover {
-            transform: scale(1.1);
-            background: linear-gradient(45deg, #ff4b2b, #ff416c);
+            background: var(--accent-fire);
+            box-shadow: 0 0 10px var(--accent-fire);
         }
 
-        .btn-copy i {
-            margin-right: 5px;
-        }
-
-        footer {
-            margin-top: 20px;
-            color: #aaa;
+        /* --- Footer --- */
+        .footer {
+            margin-top: 25px;
             font-size: 12px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* --- Animation for text --- */
+        .acc-name-check {
+            font-size: 11px;
+            color: #00ff7f; /* สีเขียว */
+            background: rgba(0, 255, 127, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 4px;
+            display: inline-block;
         }
 
     </style>
 </head>
 <body>
 
-    <div class="fire-particles" id="particles"></div>
+    <div class="fire-container" id="fireContainer"></div>
 
     <div class="container">
-        <div class="header-title">
-            <i class="fas fa-fire-alt" style="color: #ff4500;"></i> ช่องทางการโอนเงิน
-        </div>
-        <div class="header-subtitle">ฟารีส อูมา</div>
+        <div class="card">
+            <div class="profile-img">
+                <i class="fas fa-fire"></i>
+            </div>
+            <h1>RSPON รับเงิน <i class="fas fa-check-circle verified-badge"></i></h1>
+            <p class="subtitle">เลือกช่องทางการโอนเงินด้านล่าง</p>
 
-        <div class="account-card kbank">
-            <div class="bank-icon">
-                <i class="fas fa-university"></i>
-            </div>
-            <div class="info">
-                <span class="bank-name">ธนาคารกสิกรไทย (KBank)</span>
-                <div class="acc-number" id="kbank-num">197-8-19753-8</div>
-                <span class="acc-name">ชื่อ: ฟารีส อูมา</span>
-            </div>
-            <button class="btn-copy" onclick="copyToClipboard('1978197538', 'กสิกรไทย')">
-                <i class="fas fa-copy"></i> คัดลอก
-            </button>
-        </div>
+            <div class="payment-list">
+                
+                <div class="payment-item">
+                    <div class="payment-left">
+                        <img src="https://raw.githubusercontent.com/guidea/thai-bank-icons/master/official/kbank.png" alt="KBank" class="bank-logo">
+                        <div class="payment-details">
+                            <span class="bank-label">ธนาคารกสิกรไทย</span>
+                            <span class="acc-num">197-8-19753-8</span>
+                            <span class="acc-name-check">ชื่อบัญชีตรง</span>
+                        </div>
+                    </div>
+                    <button class="btn-copy" onclick="copyText('1978197538', 'กสิกรไทย')">
+                        <i class="far fa-copy"></i>
+                    </button>
+                </div>
 
-        <div class="account-card wallet">
-            <div class="bank-icon">
-                <i class="fas fa-wallet"></i>
-            </div>
-            <div class="info">
-                <span class="bank-name">TrueMoney Wallet</span>
-                <div class="acc-number" id="wallet-num">084-090-4821</div>
-                <span class="acc-name">ชื่อ: ฟารีส อูมา</span>
-            </div>
-            <button class="btn-copy" onclick="copyToClipboard('0840904821', 'TrueMoney Wallet')">
-                <i class="fas fa-copy"></i> คัดลอก
-            </button>
-        </div>
+                <div class="payment-item">
+                    <div class="payment-left">
+                        <img src="https://play-lh.googleusercontent.com/eOV6T8dO8y3fD1-6JqQ0Q1-6-6Z1-6-6Z1-6-6Z1-6-6Z1-6-6" 
+                             onerror="this.src='https://yt3.googleusercontent.com/ytc/AIdro_nK_i7d5w0l2_E8d2_E8d2_E8d2_E8d2=s900-c-k-c0x00ffffff-no-rj'"
+                             style="object-fit: contain; background: #fff;"
+                             alt="TrueMoney" class="bank-logo">
+                        <div class="payment-details">
+                            <span class="bank-label">TrueMoney Wallet</span>
+                            <span class="acc-num">084-090-4821</span>
+                            <span class="acc-name-check">ชื่อบัญชีตรง</span>
+                        </div>
+                    </div>
+                    <button class="btn-copy" onclick="copyText('0840904821', 'TrueMoney')">
+                        <i class="far fa-copy"></i>
+                    </button>
+                </div>
 
-        <div class="account-card promptpay">
-            <div class="bank-icon">
-                <i class="fas fa-qrcode"></i>
-            </div>
-            <div class="info">
-                <span class="bank-name">พร้อมเพย์ (PromptPay)</span>
-                <div class="acc-number" id="pp-num">084-090-4821</div>
-                <span class="acc-name">ชื่อ: ฟารีส อูมา</span>
-            </div>
-            <button class="btn-copy" onclick="copyToClipboard('0840904821', 'พร้อมเพย์')">
-                <i class="fas fa-copy"></i> คัดลอก
-            </button>
-        </div>
+                <div class="payment-item">
+                    <div class="payment-left">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c5/PromptPay-logo.png" 
+                             style="object-fit: contain; padding: 5px;" 
+                             alt="PromptPay" class="bank-logo">
+                        <div class="payment-details">
+                            <span class="bank-label">พร้อมเพย์ (PromptPay)</span>
+                            <span class="acc-num">084-090-4821</span>
+                            <span class="acc-name-check">ชื่อบัญชีตรง</span>
+                        </div>
+                    </div>
+                    <button class="btn-copy" onclick="copyText('0840904821', 'พร้อมเพย์')">
+                        <i class="far fa-copy"></i>
+                    </button>
+                </div>
 
-        <footer>
-            <p>ขอบคุณสำหรับการสนับสนุน</p>
-        </footer>
+            </div>
+
+            <div class="footer">
+                © 2024 Farees Uma. Secure Payment.
+            </div>
+        </div>
     </div>
 
     <script>
-        // ฟังก์ชันสร้างสะเก็ดไฟลอยขึ้นมา
-        function createParticles() {
-            const container = document.getElementById('particles');
-            const particleCount = 20;
+        // --- 1. Animation Logic ---
+        function createSparks() {
+            const container = document.getElementById('fireContainer');
+            const sparkCount = 25; // จำนวนสะเก็ดไฟ
 
-            for (let i = 0; i < particleCount; i++) {
-                let particle = document.createElement('div');
-                particle.classList.add('particle');
+            for (let i = 0; i < sparkCount; i++) {
+                const spark = document.createElement('div');
+                spark.classList.add('spark');
                 
-                // สุ่มขนาด
-                let size = Math.random() * 10 + 5;
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
+                // Random Size
+                const size = Math.random() * 8 + 2;
+                spark.style.width = `${size}px`;
+                spark.style.height = `${size}px`;
 
-                // สุ่มตำแหน่งเริ่มต้นแนวนอน
-                particle.style.left = `${Math.random() * 100}%`;
+                // Random Position X
+                spark.style.left = `${Math.random() * 100}%`;
 
-                // สุ่มระยะเวลา Animation
-                let duration = Math.random() * 3 + 4;
-                particle.style.animationDuration = `${duration}s`;
+                // Random Animation Duration & Delay
+                spark.style.animationDuration = `${Math.random() * 3 + 5}s`;
+                spark.style.animationDelay = `${Math.random() * 5}s`;
+                
+                // Random Color Variance (Red/Orange/Yellow)
+                const colors = ['rgba(255, 69, 0, 0.7)', 'rgba(255, 140, 0, 0.7)', 'rgba(255, 215, 0, 0.5)'];
+                spark.style.background = colors[Math.floor(Math.random() * colors.length)];
 
-                // สุ่มเวลาดีเลย์
-                particle.style.animationDelay = `${Math.random() * 5}s`;
-
-                container.appendChild(particle);
+                container.appendChild(spark);
             }
         }
+        createSparks();
 
-        createParticles();
+        // --- 2. Copy Function Logic ---
+        function copyText(number, bankName) {
+            navigator.clipboard.writeText(number).then(() => {
+                
+                // Haptic Feedback (สั่นเบาๆ ถ้ามือถือรองรับ)
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
 
-        // ฟังก์ชันคัดลอกเลขบัญชี
-        function copyToClipboard(text, bankName) {
-            navigator.clipboard.writeText(text).then(() => {
-                // แจ้งเตือนสวยๆ ด้วย SweetAlert2
+                // SweetAlert2 Popup
                 Swal.fire({
+                    title: 'คัดลอกสำเร็จ!',
+                    html: `เลขบัญชี <b>${bankName}</b><br><span style="color:#ffd700; font-size:1.2em">${number}</span>`,
                     icon: 'success',
-                    title: 'คัดลอกเรียบร้อย!',
-                    text: `เลขบัญชี ${bankName} ถูกคัดลอกแล้ว`,
-                    background: '#222',
+                    background: '#1f1f1f',
                     color: '#fff',
-                    confirmButtonColor: '#ff4b2b',
-                    timer: 2000,
-                    showConfirmButton: false
+                    showConfirmButton: false,
+                    timer: 1500,
+                    backdrop: `rgba(0,0,0,0.6)`
                 });
+
             }).catch(err => {
-                console.error('ไม่สามารถคัดลอกได้: ', err);
+                console.error('Error copying text: ', err);
+                Swal.fire({
+                    title: 'ผิดพลาด',
+                    text: 'ไม่สามารถคัดลอกได้',
+                    icon: 'error'
+                });
             });
         }
     </script>
